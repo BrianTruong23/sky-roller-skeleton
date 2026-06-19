@@ -9,6 +9,9 @@ public static class CreatePlatformSectionPrefabs
     const string BlockPath = "Assets/Sprites/FBX/block-grass-large-tall.fbx";
     const string QueuePath = "Assets/Sprites/FBX/queue-entrance.fbx";
     const string TreePath = "Assets/Sprites/FBX/tree-large.fbx";
+    const string ConveyorPath = "Assets/Sprites/FBX/conveyor-belt.fbx";
+    const string SpikePath = "Assets/Sprites/FBX/trap-spikes-large.fbx";
+    const string CoasterPath = "Assets/Sprites/FBX/coaster-monorail-straight-bend-large.fbx";
 
     const float BlockSpacing = 2.082125f;
     const int BlockRows = 4;
@@ -17,12 +20,38 @@ public static class CreatePlatformSectionPrefabs
     static readonly Vector3 ColliderSize = new Vector3(2.082125f, 2f, 2.082125f);
     static readonly Vector3 ColliderCenter = new Vector3(0f, 1f, 0f);
 
+    static readonly string[] RequiredPrefabPaths =
+    {
+        OutputFolder + "/Section_Straight.prefab",
+        OutputFolder + "/Section_Wide.prefab",
+        OutputFolder + "/Section_Queue.prefab",
+        OutputFolder + "/Section_Tree.prefab",
+        OutputFolder + "/Section_SpeedBoost.prefab",
+        OutputFolder + "/Section_Spikes.prefab",
+        OutputFolder + "/Section_CoasterLaunch.prefab",
+    };
+
+    [InitializeOnLoadMethod]
+    static void AutoCreateMissingPrefabs()
+    {
+        EditorApplication.delayCall += () =>
+        {
+            if (!AllPrefabsExist())
+            {
+                CreateAll();
+            }
+        };
+    }
+
     [MenuItem("Sky Roller/Create Platform Section Prefabs")]
     public static void CreateAll()
     {
         GameObject blockSource = AssetDatabase.LoadAssetAtPath<GameObject>(BlockPath);
         GameObject queueSource = AssetDatabase.LoadAssetAtPath<GameObject>(QueuePath);
         GameObject treeSource = AssetDatabase.LoadAssetAtPath<GameObject>(TreePath);
+        GameObject conveyorSource = AssetDatabase.LoadAssetAtPath<GameObject>(ConveyorPath);
+        GameObject spikeSource = AssetDatabase.LoadAssetAtPath<GameObject>(SpikePath);
+        GameObject coasterSource = AssetDatabase.LoadAssetAtPath<GameObject>(CoasterPath);
 
         if (blockSource == null)
         {
@@ -44,10 +73,26 @@ public static class CreatePlatformSectionPrefabs
         CreateWideSection(blockSource);
         CreateQueueSection(blockSource, queueSource);
         CreateTreeSection(blockSource, treeSource);
+        CreateSpeedBoostSection(blockSource, conveyorSource);
+        CreateSpikeSection(blockSource, spikeSource);
+        CreateCoasterLaunchSection(blockSource, coasterSource);
 
         AssetDatabase.SaveAssets();
         AssetDatabase.Refresh();
-        Debug.Log("Created 4 platform section prefabs in " + OutputFolder);
+        Debug.Log("Created 7 platform section prefabs in " + OutputFolder);
+    }
+
+    static bool AllPrefabsExist()
+    {
+        foreach (string prefabPath in RequiredPrefabPaths)
+        {
+            if (AssetDatabase.LoadAssetAtPath<GameObject>(prefabPath) == null)
+            {
+                return false;
+            }
+        }
+
+        return true;
     }
 
     static void CreateStraightSection(GameObject blockSource)
@@ -151,6 +196,95 @@ public static class CreatePlatformSectionPrefabs
         PlaceBlock(blockSource, root.transform, 0f, RowZ(3), "Block_C_3");
 
         SavePrefab(root, "Section_Tree.prefab");
+    }
+
+    static void CreateSpeedBoostSection(GameObject blockSource, GameObject conveyorSource)
+    {
+        GameObject root = CreateSectionRoot("Section_SpeedBoost");
+        CreateCenterPath(blockSource, root.transform);
+
+        GameObject boost = CreateHazardObject(conveyorSource, root.transform, "conveyor-belt", RowZ(2));
+        BoxCollider trigger = EnsureBoxCollider(boost);
+        trigger.isTrigger = true;
+        trigger.center = new Vector3(0f, 2f, 0f);
+        trigger.size = new Vector3(2.5f, 2.5f, 2.5f);
+
+        if (boost.GetComponent<SpeedBoostZone>() == null)
+        {
+            boost.AddComponent<SpeedBoostZone>();
+        }
+
+        SavePrefab(root, "Section_SpeedBoost.prefab");
+    }
+
+    static void CreateSpikeSection(GameObject blockSource, GameObject spikeSource)
+    {
+        GameObject root = CreateSectionRoot("Section_Spikes");
+        CreateCenterPath(blockSource, root.transform);
+
+        GameObject spike = CreateHazardObject(spikeSource, root.transform, "trap-spikes-large", RowZ(2));
+        BoxCollider trigger = EnsureBoxCollider(spike);
+        trigger.isTrigger = true;
+        trigger.center = new Vector3(0f, 1.2f, 0f);
+        trigger.size = new Vector3(2f, 2.5f, 2f);
+
+        if (spike.GetComponent<SpikeHazard>() == null)
+        {
+            spike.AddComponent<SpikeHazard>();
+        }
+
+        SavePrefab(root, "Section_Spikes.prefab");
+    }
+
+    static void CreateCoasterLaunchSection(GameObject blockSource, GameObject coasterSource)
+    {
+        GameObject root = CreateSectionRoot("Section_CoasterLaunch");
+        CreateCenterPath(blockSource, root.transform);
+
+        GameObject coaster = CreateHazardObject(coasterSource, root.transform, "coaster-monorail-straight-bend-large", RowZ(2));
+        coaster.transform.localPosition += new Vector3(0f, 0.5f, 0f);
+        BoxCollider trigger = EnsureBoxCollider(coaster);
+        trigger.isTrigger = true;
+        trigger.center = new Vector3(0f, 1.5f, 0f);
+        trigger.size = new Vector3(2f, 1.5f, 3f);
+
+        if (coaster.GetComponent<CoasterLaunchZone>() == null)
+        {
+            coaster.AddComponent<CoasterLaunchZone>();
+        }
+
+        SavePrefab(root, "Section_CoasterLaunch.prefab");
+    }
+
+    static void CreateCenterPath(GameObject blockSource, Transform parent)
+    {
+        for (int row = 0; row < BlockRows; row++)
+        {
+            PlaceBlock(blockSource, parent, 0f, RowZ(row), "Block_C_" + row);
+        }
+    }
+
+    static GameObject CreateHazardObject(GameObject source, Transform parent, string objectName, float z)
+    {
+        GameObject instance = source != null
+            ? Object.Instantiate(source, parent)
+            : new GameObject(objectName);
+
+        instance.name = objectName;
+        instance.transform.SetParent(parent, false);
+        instance.transform.localPosition = new Vector3(0f, 0f, z);
+        return instance;
+    }
+
+    static BoxCollider EnsureBoxCollider(GameObject gameObject)
+    {
+        BoxCollider collider = gameObject.GetComponent<BoxCollider>();
+        if (collider == null)
+        {
+            collider = gameObject.AddComponent<BoxCollider>();
+        }
+
+        return collider;
     }
 
     static GameObject CreateSectionRoot(string sectionName)

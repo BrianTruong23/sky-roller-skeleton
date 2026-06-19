@@ -8,6 +8,11 @@ public class SpikeHazard : MonoBehaviour
 
     void Awake()
     {
+        if (gameOverUI == null)
+        {
+            gameOverUI = FindAnyObjectByType<GameOverUI>();
+        }
+
         Collider col = GetComponent<Collider>();
         if (col != null)
         {
