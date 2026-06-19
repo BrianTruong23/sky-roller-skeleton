@@ -6,6 +6,9 @@ public class PlayerMovement : MonoBehaviour
 {
     float forwardSpeed = 5f;
     float sideSpeed = 6f;
+    [SerializeField] float jumpSpeed = 7f;
+    [SerializeField] float groundCheckDistance = 0.65f;
+    [SerializeField] LayerMask groundLayers = ~0;
 
     Rigidbody rb;
     Vector2 moveInput;
@@ -28,6 +31,7 @@ public class PlayerMovement : MonoBehaviour
         rb = GetComponent<Rigidbody>();
         originalForwardSpeed = forwardSpeed;
         originalSideSpeed = sideSpeed;
+        ControlHintUI.ShowDefaultControls();
     }
 
     public void ActivateSpeedBost(float boostSpeed, float duration)
@@ -113,6 +117,30 @@ public class PlayerMovement : MonoBehaviour
         moveInput = value.Get<Vector2>();
     }
 
+    void OnJump()
+    {
+        TryJump();
+    }
+
+    void Update()
+    {
+        if (Keyboard.current != null && Keyboard.current.spaceKey.wasPressedThisFrame)
+        {
+            TryJump();
+        }
+    }
+
+    void TryJump()
+    {
+        if (!IsGrounded())
+        {
+            return;
+        }
+
+        Vector3 velocity = rb.linearVelocity;
+        rb.linearVelocity = new Vector3(velocity.x, jumpSpeed, velocity.z);
+    }
+
     void FixedUpdate()
     {
         currentSideInput = Mathf.SmoothDamp(
@@ -163,5 +191,10 @@ public class PlayerMovement : MonoBehaviour
         }
 
         return false;
+    }
+
+    bool IsGrounded()
+    {
+        return Physics.Raycast(transform.position, Vector3.down, groundCheckDistance, groundLayers, QueryTriggerInteraction.Ignore);
     }
 }
