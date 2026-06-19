@@ -1,0 +1,47 @@
+# macOS
+.DS_Store
+
+# Unity generated folders
+/Library/
+/Temp/
+/Obj/
+/Build/
+/Builds/
+/Logs/
+/UserSettings/
+/MemoryCaptures/
+
+# Unity crash reports and generated data
+/sysinfo.txt
+*.stackdump
+
+# Auto-generated Visual Studio / Rider / VS Code files
+/.vs/
+/.vscode/
+/.idea/
+*.csproj
+*.pidb
+*.suo
+*.user
+*.userprefs
+*.sln
+*.slnx
+
+# Unity asset store tools
+/Assets/AssetStoreTools*
+
+# JetBrains Rider cache
+/.Rider*/
+
+# NUnit generated files
+/ExportedObj/
+*.booproj
+
+# Build artifacts
+*.apk
+*.aab
+*.unitypackage
+*.app
+
+# Logs and diagnostics
+*.log
