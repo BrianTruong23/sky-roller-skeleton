@@ -31,9 +31,9 @@ The game also displays an in-game control hint: move left/right, jump with Space
 
 The older fixed test layout is preserved in `Assets/Scenes/GameScene_ObjectTest.unity` in case I want to test individual objects or hazards separately.
 
-## Professor Requirements And How This Game Fulfills Them
+## Game Requirements And How This Game Fulfills Them
 
-### Easy Requirement 1: Survival Score
+### Requirement 1: Survival Score
 
 **Requirement:** Add a survival score based on time survived and display the survival score on the screen using UI text.
 
@@ -48,7 +48,7 @@ Relevant script:
 
 - `Assets/Scripts/SurvivalScore.cs`
 
-### Easy Requirement 2: Lose Condition And Restart
+### Requirement 2: Lose Condition And Restart
 
 **Requirement:** Add a lose condition when the player falls off the platforms and add a restart option after the player loses.
 
@@ -65,7 +65,7 @@ Relevant scripts:
 - `Assets/Scripts/DeathZone.cs`
 - `Assets/Scripts/GameOverUI.cs`
 
-### Medium Requirement: At Least Three Hazard Types
+### Requirement 3: At Least Three Hazard Types
 
 **Requirement:** Add at least three different hazard types besides falling off the platform. Hazards must make the player lose or affect the player's movement or control.
 
@@ -92,7 +92,7 @@ Relevant scripts:
 - `Assets/Scripts/SpikeHazard.cs`
 - `Assets/Scripts/EffectNotificationUI.cs`
 
-### Hard Requirement: Endless Procedural Platform Generation
+### Requirement 4: Endless Procedural Platform Generation
 
 **Requirement:** Create an endless procedural platform generation system.
 
@@ -109,7 +109,7 @@ Relevant scripts:
 - `Assets/Scripts/PlatformGenerator.cs`
 - `Assets/Scripts/PlatformSection.cs`
 
-### Hard Requirement: At Least Four Platform Prefabs
+### Requirement 5: At Least Four Platform Prefabs
 
 **Requirement:** Create at least four different platform prefabs for the generator to use.
 
