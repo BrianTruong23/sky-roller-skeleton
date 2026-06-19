@@ -18,7 +18,6 @@ public class HazardTrigger : MonoBehaviour
     [SerializeField] string spikeMessage = "You hit the spikes!";
 
     bool spikeTriggered;
-    bool playerInside;
 
     void Awake()
     {
@@ -34,7 +33,6 @@ public class HazardTrigger : MonoBehaviour
             return;
         }
 
-        playerInside = true;
 
         switch (hazardType)
         {
@@ -68,7 +66,6 @@ public class HazardTrigger : MonoBehaviour
             return;
         }
 
-        playerInside = false;
 
         if (hazardType == HazardType.Slow)
         {

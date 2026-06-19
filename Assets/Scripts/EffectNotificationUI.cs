@@ -46,7 +46,7 @@ public class EffectNotificationUI : MonoBehaviour
         TMP_FontAsset font = TMP_Settings.defaultFontAsset;
         if (font == null)
         {
-            TMP_Text existing = FindObjectOfType<TMP_Text>();
+            TMP_Text existing = FindAnyObjectByType<TMP_Text>();
             if (existing != null)
             {
                 font = existing.font;
