@@ -16,6 +16,7 @@ public class DeathZone : MonoBehaviour
         }
 
         hasLost = true;
+        EffectNotificationUI.Show("You fell off the path!");
         gameOverUI.showGameOver();
         Time.timeScale = 0f;
     }

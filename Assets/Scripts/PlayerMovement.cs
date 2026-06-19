@@ -18,7 +18,10 @@ public class PlayerMovement : MonoBehaviour
     float forwardMultiplier = 1f;
     float sideMultiplier = 1f;
 
-    bool controlsLocked;
+    int slowZoneCount;
+    int forwardBlockCount;
+
+    const float SlowZoneMinForward = 2.5f;
 
     void Start()
     {
@@ -39,6 +42,29 @@ public class PlayerMovement : MonoBehaviour
         forwardSpeed = originalForwardSpeed;
     }
 
+    public void EnterSlowZone(float forwardMult, float sideMult)
+    {
+        slowZoneCount++;
+        ApplySlowEffect(forwardMult, sideMult);
+    }
+
+    public void ApplySlowEffect(float forwardMult, float sideMult)
+    {
+        forwardMultiplier = forwardMult;
+        sideMultiplier = sideMult;
+    }
+
+    public void ExitSlowZone()
+    {
+        slowZoneCount = Mathf.Max(0, slowZoneCount - 1);
+        if (slowZoneCount == 0)
+        {
+            ResetMovementMultipliers();
+        }
+    }
+
+    public bool IsInSlowZone => slowZoneCount > 0;
+
     public void SetMovementMultipliers(float forwardMult, float sideMult)
     {
         forwardMultiplier = forwardMult;
@@ -51,19 +77,14 @@ public class PlayerMovement : MonoBehaviour
         sideMultiplier = 1f;
     }
 
-    public void StopBriefly(float stopDuration)
+    public void AddForwardBlock()
     {
-        StartCoroutine(StopBrieflyRoutine(stopDuration));
+        forwardBlockCount++;
     }
 
-    IEnumerator StopBrieflyRoutine(float stopDuration)
+    public void RemoveForwardBlock()
     {
-        controlsLocked = true;
-        rb.linearVelocity = Vector3.zero;
-
-        yield return new WaitForSeconds(stopDuration);
-
-        controlsLocked = false;
+        forwardBlockCount = Mathf.Max(0, forwardBlockCount - 1);
     }
 
     public void LaunchUp(float upwardSpeed, float forwardBoost, float duration)
@@ -89,20 +110,11 @@ public class PlayerMovement : MonoBehaviour
 
     void OnMove(InputValue value)
     {
-        if (!controlsLocked)
-        {
-            moveInput = value.Get<Vector2>();
-        }
+        moveInput = value.Get<Vector2>();
     }
 
     void FixedUpdate()
     {
-        if (controlsLocked)
-        {
-            rb.linearVelocity = Vector3.zero;
-            return;
-        }
-
         currentSideInput = Mathf.SmoothDamp(
             currentSideInput,
             moveInput.x,
@@ -111,6 +123,23 @@ public class PlayerMovement : MonoBehaviour
         );
 
         float currentForward = forwardSpeed * forwardMultiplier;
+        if (IsInSlowZone)
+        {
+            currentForward = Mathf.Max(currentForward, SlowZoneMinForward);
+        }
+
+        if (forwardBlockCount > 0)
+        {
+            if (IsTouchingTreeBlocker())
+            {
+                currentForward = 0f;
+            }
+            else
+            {
+                forwardBlockCount = 0;
+            }
+        }
+
         float currentSide = sideSpeed * sideMultiplier;
 
         Vector3 movement = new Vector3(
@@ -120,5 +149,19 @@ public class PlayerMovement : MonoBehaviour
         );
 
         rb.linearVelocity = movement;
+    }
+
+    bool IsTouchingTreeBlocker()
+    {
+        Collider[] overlaps = Physics.OverlapSphere(transform.position, 0.6f);
+        foreach (Collider overlap in overlaps)
+        {
+            if (overlap.GetComponent<TreeBlocker>() != null)
+            {
+                return true;
+            }
+        }
+
+        return false;
     }
 }

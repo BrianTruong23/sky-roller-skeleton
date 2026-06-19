@@ -15,13 +15,22 @@ public class SpeedBoostZone : MonoBehaviour
 
     private void OnTriggerEnter(Collider collider)
     {
-        if (collider.CompareTag("Player"))
+        if (!collider.CompareTag("Player"))
         {
-            PlayerMovement playerMovement = collider.GetComponent<PlayerMovement>();
-            if (playerMovement != null)
-            {
-                playerMovement.ActivateSpeedBost(boostSpeed, boostDuration);
-            }
+            return;
+        }
+
+        Rigidbody rb = collider.attachedRigidbody;
+        if (rb == null)
+        {
+            return;
+        }
+
+        PlayerMovement playerMovement = rb.GetComponent<PlayerMovement>();
+        if (playerMovement != null)
+        {
+            EffectNotificationUI.Show("Speed boosted!");
+            playerMovement.ActivateSpeedBost(boostSpeed, boostDuration);
         }
     }
 

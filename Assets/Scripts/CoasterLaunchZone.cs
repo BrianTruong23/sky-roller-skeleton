@@ -15,13 +15,20 @@ public class CoasterLaunchZone : MonoBehaviour
             return;
         }
 
-        PlayerMovement movement = other.GetComponent<PlayerMovement>();
+        Rigidbody rb = other.attachedRigidbody;
+        if (rb == null)
+        {
+            return;
+        }
+
+        PlayerMovement movement = rb.GetComponent<PlayerMovement>();
         if (movement == null)
         {
             return;
         }
 
         hasLaunched = true;
+        EffectNotificationUI.Show("Launched upward!");
         movement.LaunchUp(upwardSpeed, forwardBoost, boostDuration);
     }
 }
