@@ -5,14 +5,23 @@ public class SurvivalScore : MonoBehaviour
 {
     [SerializeField] TextMeshProUGUI scoreText;
 
+    bool isRunning = true;
+    public void StopTimer()
+    {
+        isRunning = false;
+    }
+
     float elapsedTime;
 
     void Update()
     {
-        elapsedTime += Time.deltaTime;
-        int score = Mathf.FloorToInt(elapsedTime);
+        if (isRunning)
+        {
+            elapsedTime += Time.deltaTime;
+            int score = Mathf.FloorToInt(elapsedTime);
 
-        scoreText.text = $"Score: {score}";
+            scoreText.text = $"Score: {score}";
+        }
 
     }
 }

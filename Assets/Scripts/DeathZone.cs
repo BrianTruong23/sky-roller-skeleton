@@ -4,24 +4,21 @@ using UnityEngine.SceneManagement;
 public class DeathZone : MonoBehaviour
 {
 
+    [SerializeField] GameOverUI gameOverUI;
+
+    bool hasLost;
     private void OnTriggerEnter(Collider collider)
     {
-        if (collider.CompareTag("Player"))
+
+        if (hasLost || !collider.CompareTag("Player"))
         {
-         SceneManager.LoadScene(SceneManager.GetActiveScene().name);   
+            return;
         }
+
+        hasLost = true;
+        gameOverUI.showGameOver();
+        Time.timeScale = 0f;
     }
 
 
-    // Start is called once before the first execution of Update after the MonoBehaviour is created
-    void Start()
-    {
-        
-    }
-
-    // Update is called once per frame
-    void Update()
-    {
-        
-    }
 }
